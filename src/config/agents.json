@@ -1,0 +1,46 @@
+{
+    "agents": [
+        {
+            "id": "agent_1",
+            "name": "Alice",
+            "preferences": {
+                "hawaiian_pizza": "love"
+            },
+            "relationship": {
+                "agent_1": 1.0,
+                "agent_2": 0.2,
+                "agent_3": 0.8,
+                "agent_4": 0.5,
+                "agent_5": 0.1
+            }
+        },
+        {
+            "id": "agent_2",
+            "name": "Bob",
+            "preferences": {
+                "hawaiian_pizza": "hate"
+            }
+        },
+        {
+            "id": "agent_3",
+            "name": "Charlie",
+            "preferences": {
+                "hawaiian_pizza": "love"
+            }
+        },
+        {
+            "id": "agent_4",
+            "name": "Dana",
+            "preferences": {
+                "hawaiian_pizza": "hate"
+            }
+        },
+        {
+            "id": "agent_5",
+            "name": "Eli",
+            "preferences": {
+                "hawaiian_pizza": "hate"
+            }
+        }
+    ]
+}

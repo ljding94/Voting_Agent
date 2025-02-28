@@ -1,0 +1,17 @@
+{
+    "rounds": 5,
+    "discussion_topic": "Pineapple on pizza",
+    "voting_question": "Do you support having pineapple on pizza? Chose 1: yes, 2: no. Answer with exactly one word.",
+    "vote_criteria": {
+        "Support": ["yes", "love"],
+        "Against": ["no", "hate"]
+    },
+    "communication_probabilities": {
+        "P_same": 0.8,
+        "P_opposite": 0.8
+    },
+    "agent_memory": {
+        "max_relevant_items": 3,
+        "recency_weight": 0.7
+    }
+}
