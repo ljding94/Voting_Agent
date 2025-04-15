@@ -21,7 +21,7 @@ class AgentResponse(BaseModel):
 
 
 class Agent:
-    def __init__(self, persona, memory_config=None):
+    def __init__(self, api_key, persona, memory_config=None):
         self.id = persona["id"]
         self.name = persona["name"]
         self.background = persona.get("background", "")
@@ -35,7 +35,7 @@ class Agent:
         }
 
         # Replace OpenAI with ChatOpenAI
-        self.llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo")
+        self.llm = ChatOpenAI(temperature=0.7, model="gpt-3.5-turbo", api_key=api_key)
 
     def generate_response(self, prompt, context=""):
         """
@@ -134,13 +134,13 @@ class Agent:
         }
 
     @staticmethod
-    def load_agents_from_file(filepath, memory_config=None):
+    def load_agents_from_file(api_key, filepath, memory_config=None):
         """
         Loads agent personas from a single JSON file and returns a list of Agent instances.
         """
         with open(filepath, "r") as file, open(filepath, "r") as file:
             data = json.load(file)
-        agents = [Agent(persona, memory_config) for persona in data.get("agents", [])]
+        agents = [Agent(api_key, persona, memory_config) for persona in data.get("agents", [])]
         return agents
 
 
