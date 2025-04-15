@@ -4,30 +4,34 @@ from datetime import datetime
 from langchain_community.llms import OpenAI
 from langchain_community.chat_models import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage
+from langchain.output_parsers import PydanticOutputParser
+from langchain.prompts import PromptTemplate
+
+from typing import Optional
+from pydantic import BaseModel, Field
+import networkx as nx
+import random
+
+
+class AgentResponse(BaseModel):
+    reflection: str = Field(description="A reflection on who you are and your background")
+    reasoning: str = Field(description="The reasoning behind the response")
+    answer: str = Field(description="The main answer of the agent")
+    sentiment: int = Field(description="The sentiment of the answer towards the question, from -5 to 5")
 
 
 class Agent:
     def __init__(self, persona, memory_config=None):
         self.id = persona["id"]
         self.name = persona["name"]
-        self.role = persona.get("role", "Agent")
         self.background = persona.get("background", "")
-        self.personality = persona.get("personality", {})
-        self.knowledge = persona.get("knowledge", {})
-        self.relationships = persona.get("relationships", {}) # probability weight I will listen to this person
-
-        # Store preferences (new field in agents.json)
-        self.preferences = persona.get("preferences", {})
-
-        # Memory configuration with defaults
-        self.memory_config = memory_config or {"max_relevant_items": 3}
+        self.personality = persona.get("personality", "")  # Optional personality trait
+        self.upbringing_category = persona.get("upbringing_category", None)  # Optional upbringing category
 
         # Enhanced memory system with categories
         self.memory = {
             "personal_statements": [],  # Agent's own responses
             "observed_statements": [],  # Other agents' statements
-            "voting_history": [],  # Records of votes cast (own and others)
-            "discussion_topics": [],  # Topics discussed
         }
 
         # Replace OpenAI with ChatOpenAI
@@ -35,32 +39,25 @@ class Agent:
 
     def generate_response(self, prompt, context=""):
         """
-        Generates a response based on the given prompt and optional context.
-        It constructs a detailed prompt incorporating the agent's persona and memory.
+        Generates a structured response based on the given prompt and optional context.
+        Returns a formatted AgentResponse object with reasoning, answer, and sentiment.
         """
         # Build context from memory relevant to the prompt
-        memory_context = self._get_relevant_memory_context(prompt)
+        memory_context = self._get_memory_context()
 
         # Create system message with agent's background info
-        system_content = f"You are Agent {self.name} ({self.role}).\n"
-
-        # Include background if available
+        system_content = f"You are {self.name}.\n"
         if self.background:
             system_content += f"Background: {self.background}\n"
-
-        # Include personality if available
-        if self.personality:
             system_content += f"Personality: {self.personality}\n"
 
-        # Add preferences (new addition)
-        if self.preferences:
-            preferences_text = ", ".join([f"{k}: {v}" for k, v in self.preferences.items()])
-            system_content += f"Preferences: {preferences_text}\n"
+        # Setup Pydantic parser for structured output
+        parser = PydanticOutputParser(pydantic_object=AgentResponse)
 
-        system_content += "Respond as this character would, maintaining their personality and background."
-
-        # Create user message with context, memory and prompt
+        # User content - include the format instructions for structured output
         user_content = ""
+        user_content += f"You must respond in the following format:\n{parser.get_format_instructions()}\n\n"
+
         if memory_context:
             user_content += f"What you remember: {memory_context}\n\n"
 
@@ -70,17 +67,29 @@ class Agent:
         user_content += f"Question: {prompt}"
 
         # Create message list
-        messages = [
-            SystemMessage(content=system_content),
-            HumanMessage(content=user_content)
-        ]
+        messages = [SystemMessage(content=system_content), HumanMessage(content=user_content)]
 
         # Get response
-        response = self.llm.invoke(messages).content
+        try:
+            raw_response = self.llm.invoke(messages).content
+            agent_response = parser.parse(raw_response)
 
-        # Store own response in memory
-        self.record_own_statement(prompt, response)
+            # Store full response text in memory
+            formatted_response = f"Reasoning: {agent_response.reasoning}\nAnswer: {agent_response.answer}\nSentiment: {agent_response.sentiment}"
+            self.record_own_statement(prompt, formatted_response)
 
+            response = agent_response
+
+        except Exception as e:
+            # Fallback for parsing errors
+            print(f"Error parsing structured response: {e}")
+            fallback_response = AgentResponse(
+                reasoning="Sorry, I had trouble structuring my response.", answer=raw_response if "raw_response" in locals() else "Error generating response.", sentiment=0
+            )
+            self.record_own_statement(prompt, f"Error: {e}\nFallback: {fallback_response.answer}")
+            response = fallback_response
+
+        self._clean_memory()
         return response
 
     def record_own_statement(self, prompt, response):
@@ -95,58 +104,87 @@ class Agent:
     def record_observed_statement(self, speaker_name, statement):
         """Record another agent's statement"""
         observation = {
-            "timestamp": datetime.now().isoformat(),
             "speaker": speaker_name,
             "statement": statement,
         }
         self.memory["observed_statements"].append(observation)
 
-    def record_vote(self, round_number, own_vote, all_votes=None):
-        """Record voting results"""
-        vote_record = {"timestamp": datetime.now().isoformat(), "round": round_number, "own_vote": own_vote, "all_votes": all_votes or {}}
-        self.memory["voting_history"].append(vote_record)
-
-    def record_discussion_topic(self, topic):
-        """Record a discussion topic"""
-        topic_entry = {"timestamp": datetime.now().isoformat(), "topic": topic}
-        self.memory["discussion_topics"].append(topic_entry)
-
-    def _get_relevant_memory_context(self, prompt):
-        """Retrieve memories relevant to the current prompt"""
-        max_items = self.memory_config.get("max_relevant_items", 3)
-
-        # Simple keyword-based relevance (could be enhanced with embeddings)
-        relevant_memories = []
-
-        # Check for relevant observed statements
+    def _get_memory_context(self):
+        memories = []
+        if self.memory["personal_statements"]:
+            memories.append(f"yourself said: {self.memory['personal_statements'][-1]['response']}")
+        # Check for observed statements
         for statement in reversed(self.memory["observed_statements"]):
-            if any(word in statement["statement"].lower() for word in prompt.lower().split()):
-                relevant_memories.append(f"{statement['speaker']} said: {statement['statement']}")
-            if len(relevant_memories) >= max_items:
-                break
+            # Get the statement content, handling different types
+            statement_text = statement["statement"]
 
-        # Check voting history
-        if "vote" in prompt.lower():
-            for vote in reversed(self.memory["voting_history"]):
-                relevant_memories.append(f"In round {vote['round']}, you voted: {vote['own_vote']}")
-                break
+            # If it's an AgentResponse object, convert to string
+            if hasattr(statement_text, "answer"):
+                statement_text = f"Answer: {statement_text.answer}\nReasoning: {statement_text.reasoning}\nSentiment: {statement_text.sentiment}"
 
-        return "\n".join(relevant_memories) if relevant_memories else ""
+            memories.append(f"{statement['speaker']} said: {statement_text}")
 
-    def update_memory(self, event):
-        """
-        Legacy method for backward compatibility
-        Adds an event to personal statements
-        """
-        self.record_own_statement("Legacy event", event)
-        self.memory.append(event)  # Keep the old list for compatibility
+        return "\n".join(memories) if memories else ""
+
+    def _clean_memory(self):
+        """Clean up memory to avoid overflow"""
+        self.memory = {
+            "personal_statements": [],  # Agent's own responses
+            "observed_statements": [],  # Other agents' statements
+        }
 
     @staticmethod
     def load_agents_from_file(filepath, memory_config=None):
         """
         Loads agent personas from a single JSON file and returns a list of Agent instances.
         """
-        with open(filepath, "r") as file:
+        with open(filepath, "r") as file, open(filepath, "r") as file:
             data = json.load(file)
         agents = [Agent(persona, memory_config) for persona in data.get("agents", [])]
         return agents
+
+
+class Community:
+    def __init__(self, agents, p=0.5):
+        """
+        Initializes a community of agents and sets up their connectivity using
+        a random network model.
+
+        Parameters:
+        - agents: list of Agent instances.
+        - p: Probability for edge creation between any two agents.
+        """
+        self.agents = agents
+        self.connectivity = self._build_random_network(len(agents), p)
+
+    def _build_random_network(self, num_agents, p):
+        """
+        Builds a random network using the Erdős–Rényi model and returns a
+        mapping of agent indices to a list of neighbor indices.
+        """
+        graph = nx.erdos_renyi_graph(num_agents, p)
+        connectivity = {node: list(graph.neighbors(node)) for node in graph.nodes()}
+        return connectivity
+
+    def discussion_round(self, topic):
+        """
+        Simulate a discussion round on a given topic.
+        Each agent generates a response and shares it with its neighbors.
+
+        Parameters:
+        - topic: The topic for discussion.
+        - communication_probability: Probability that a neighbor will listen to a statement.
+        """
+        for idx, agent in enumerate(self.agents):
+            # Generate response using agent's generate_response method
+            response = agent.generate_response(topic)
+            print(f"{agent.name} says: {response.answer}")
+
+            # Retrieve neighbor indices for the current agent
+            neighbors = self.connectivity.get(idx, [])
+            print(f"  → {agent.name}'s neighbors: {[self.agents[n].name for n in neighbors]}")
+            for neighbor_idx in neighbors:
+                # Optionally, decide probabilistically if the neighbor hears the response
+                # Record that the neighbor observed this statement
+                self.agents[neighbor_idx].record_observed_statement(agent.name, response.answer)
+                print(f"  → {self.agents[neighbor_idx].name} heard this message")
