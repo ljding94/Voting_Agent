@@ -1,14 +1,20 @@
 from simulation_engine import SimulationEngine
 from analyze import *
+from dotenv import load_dotenv
+import os
 import sys
 
 def main(rounds=10, p=1.0, run=0):
+    load_dotenv()
+    api_key = os.getenv("OPENAI_API_KEY")
+    print(api_key)
     # Specify the path for storing voting results
     folder = "../data/data_pool"
     # Run the simulation
     topic = "pineapple on pizza"  # Example topic for discussion
     finfo = f"pieneapple_rounds_{rounds:.0f}_p_{p:.1f}_run_{run}"
-    engine = SimulationEngine("config/agents.json", topic, rounds, p)
+    engine = SimulationEngine(api_key, "config/agents.json",topic, rounds, p)
+
     engine.run_simulation(folder, finfo)
 
     # After the simulation, analyze and plot the voting results

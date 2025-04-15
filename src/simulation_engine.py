@@ -5,9 +5,9 @@ from agent import Agent, Community
 
 
 class SimulationEngine:
-    def __init__(self, agents_file, topic, rounds, p=0.2):
+    def __init__(self, api_key, agents_file, topic, rounds, p=0.2):
         # Initialize agents with the memory config
-        self.agents = Agent.load_agents_from_file(agents_file)
+        self.agents = Agent.load_agents_from_file(api_key, agents_file)
         self.topic = topic
         self.rounds = rounds
 
