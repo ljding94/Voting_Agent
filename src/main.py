@@ -35,7 +35,7 @@ if __name__ == "__main__":
             print("Invalid input. Please provide an integer for rounds and a float for p (e.g., python3 main 10 1.0).")
             sys.exit(1)
         print(f"Using provided values: rounds={rounds}, p={p}, run={run}")
-        main(rounds, p)
+        main(rounds, p, run)
     else:
         print("Using default values: rounds=10, p=1.0, run=0")
         # If no arguments are provided, use the default values.
