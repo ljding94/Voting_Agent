@@ -1,0 +1,64 @@
+{
+    "agents": [
+        {
+            "id": "agent_1",
+            "name": "Alice",
+            "background": "Alice is a first-generation immigrant from Italy who values family traditions and cultural heritage.",
+            "personality": "self-independent, disagreeable"
+        },
+        {
+            "id": "agent_2",
+            "name": "Bob",
+            "background": "Bob is a first-generation immigrant from Italy who values family traditions and cultural heritage.",
+            "personality": "agreeable, people-pleaser"
+        },
+        {
+            "id": "agent_3",
+            "name": "Charlie",
+            "background": "Charlie is an avid fan of heavy metal music and expresses his creativity through art and music.",
+            "personality": "self-independent, disagreeable"
+        },
+        {
+            "id": "agent_4",
+            "name": "Dana",
+            "background": "Dana is an avid fan of heavy metal music and expresses his creativity through art and music.",
+            "personality": "agreeable, people-pleaser"
+        },
+        {
+            "id": "agent_5",
+            "name": "Eli",
+            "background": "Eli is a high school student with a curious mind, actively participating in sports and social causes.",
+            "personality": "self-independent, disagreeable"
+        },
+        {
+            "id": "agent_6",
+            "name": "Fiona",
+            "background": "Fiona is a high school student with a curious mind, actively participating in sports and social causes.",
+            "personality": "agreeable, people-pleaser"
+        },
+        {
+            "id": "agent_7",
+            "name": "George",
+            "background": "George is a retired engineer who now dedicates his time to volunteering and mentoring young aspiring innovators.",
+            "personality": "self-independent, disagreeable"
+        },
+        {
+            "id": "agent_8",
+            "name": "Hannah",
+            "background": "Hannah is a retired engineer who now dedicates his time to volunteering and mentoring young aspiring innovators.",
+            "personality": "agreeable, people-pleaser"
+        },
+        {
+            "id": "agent_9",
+            "name": "Ian",
+            "background": "Ian is a mid-career finance professional with a strong interest in community development and urban planning.",
+            "personality": "self-independent, disagreeable"
+        },
+        {
+            "id": "agent_10",
+            "name": "Julia",
+            "background": "Julia is a mid-career finance professional with a strong interest in community development and urban planning.",
+            "personality": "agreeable, people-pleaser"
+        }
+    ]
+}

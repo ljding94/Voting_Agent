@@ -1,6 +1,9 @@
 /*
 !src
 src/.env
+!plot
+plot/__pycache__
+plot/figures/*
 __pycache__
 .DS_Store
 !README.md

@@ -3,11 +3,19 @@ import random
 import os
 from agent import Agent, Community
 
+log_messages = []
+
+
+def log(msg):
+    print(msg)
+    log_messages.append(msg)
+
 
 class SimulationEngine:
-    def __init__(self, api_key, agents_file, topic, rounds, p=0.2):
+    def __init__(self, api_key, nIA, nID, nAA, nAD, topic, rounds, p=0.2):
         # Initialize agents with the memory config
-        self.agents = Agent.load_agents_from_file(api_key, agents_file)
+        # self.agents = Agent.load_agents_from_file(api_key, agents_file)
+        self.agents = Agent.generate_agents_by_type(api_key, {"IA": nIA, "ID": nID, "AA": nAA, "AD": nAD})
         self.topic = topic
         self.rounds = rounds
 
@@ -19,15 +27,10 @@ class SimulationEngine:
         self.current_round = 0
 
     def load_simulation_config(self, filepath):
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             return json.load(f)
 
     def run_simulation(self, folder, finfo):
-        log_messages = []
-
-        def log(msg):
-            print(msg)
-            log_messages.append(msg)
 
         log(f"Starting simulation on topic: {self.topic}")
 
@@ -63,9 +66,9 @@ class SimulationEngine:
         # Save sentiment scores
         self.save_sentiment_scores(f"{folder}/{finfo}_sentiment_scores.json")
         log_file_path = os.path.join(folder, f"{finfo}_log.txt")
-        with open(log_file_path, 'w') as log_file:
+        with open(log_file_path, "w") as log_file:
             # Write all log messages to the file
-            log_file.write("\n".join(log_messages))
+            log_file.write("\n".join(str(msg) for msg in log_messages))
 
     def collect_votes(self):
         """Collects votes from all agents based on their sentiment response"""
@@ -75,20 +78,20 @@ class SimulationEngine:
         # Create clear voting prompt
         vote_prompt = f"Based on the discussion so far about '{self.topic}', what is your position? Express your sentiment from -5 (strongly against) to +5 (strongly support)."
 
-        print("\n--- Voting ---")
-        print(vote_prompt)
-        print("\n----------------------------------------\n")
+        log("\n--- Voting ---")
+        log(vote_prompt)
+        log("\n----------------------------------------\n")
 
         for agent in self.agents:
             # Get response with sentiment value
             vote_response = agent.generate_response(vote_prompt)
 
             # Print the agent's voting response
-            print(f"{agent.name}'s vote:")
-            print(f"Reasoning: {vote_response.reasoning}")
-            print(f"Answer: {vote_response.answer}")
-            print(f"Sentiment: {vote_response.sentiment}")
-            print("----------------------------------------\n")
+            log(f"{agent.name}'s vote:")
+            log(f"Reasoning: {vote_response.reasoning}")
+            log(f"Answer: {vote_response.answer}")
+            log(f"Sentiment: {vote_response.sentiment}")
+            log("----------------------------------------\n")
 
             # Determine vote based on sentiment value
             sentiment = vote_response.sentiment
@@ -108,9 +111,11 @@ class SimulationEngine:
             formatted_response = f"Reasoning: {vote_response.reasoning}\nAnswer: {vote_response.answer}\nSentiment: {sentiment}"
             agent.record_own_statement(vote_prompt, formatted_response)
 
-        print("Round Sentiments:", round_sentiments)
-        print("Round Votes:", round_votes)
-        print("\n----------------------------------------\n")
+        log("Round Sentiments:")
+        log(round_sentiments)
+        log("Round Votes:")
+        log(round_votes)
+        log("\n----------------------------------------\n")
         return round_votes, round_sentiments
 
     def save_sentiment_scores(self, filepath):
@@ -118,11 +123,16 @@ class SimulationEngine:
         # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
-        with open(filepath, 'w') as f:
-            json.dump(self.sentiment_scores, f, indent=2)
-        print(f"Sentiment scores saved to {filepath}")
+        # Transform sentiment scores to include agent tags
+        formatted_sentiment_scores = []
+        for round_idx, round_sentiments in enumerate(self.sentiment_scores):
+            formatted_round = {}
+            for agent_name, sentiment in round_sentiments.items():
+                # Find the agent to get their tag
+                agent = next(agent for agent in self.agents if agent.name == agent_name)
+                formatted_round[f"{agent.tag}_{agent_name}"] = sentiment
+            formatted_sentiment_scores.append(formatted_round)
 
-
-if __name__ == "__main__":
-    engine = SimulationEngine("config/agents.json", "config/simulation_config.json")
-    engine.run_simulation("data/voting_results.json")
+        with open(filepath, "w") as f:
+            json.dump(formatted_sentiment_scores, f, indent=2)
+        log(f"Sentiment scores saved to {filepath}")

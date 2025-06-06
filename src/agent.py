@@ -1,8 +1,13 @@
 # Defines the agent class with persona and LLM integration
 import json
 from datetime import datetime
-from langchain_community.llms import OpenAI
-from langchain_community.chat_models import ChatOpenAI
+
+#from langchain_community.llms import OpenAI
+#from langchain_community.chat_models import ChatOpenAI
+
+from langchain_openai import OpenAI
+from langchain_openai import ChatOpenAI
+
 from langchain.schema import SystemMessage, HumanMessage
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
@@ -21,12 +26,13 @@ class AgentResponse(BaseModel):
 
 
 class Agent:
-    def __init__(self, api_key, persona, memory_config=None):
+    def __init__(self, api_key, persona):
         self.id = persona["id"]
         self.name = persona["name"]
+        self.tag = persona.get("tag", "")
         self.background = persona.get("background", "")
         self.personality = persona.get("personality", "")  # Optional personality trait
-        self.upbringing_category = persona.get("upbringing_category", None)  # Optional upbringing category
+        #self.upbringing_category = persona.get("upbringing_category", None)  # Optional upbringing category
 
         # Enhanced memory system with categories
         self.memory = {
@@ -134,13 +140,63 @@ class Agent:
         }
 
     @staticmethod
-    def load_agents_from_file(api_key, filepath, memory_config=None):
+    def load_agents_from_file(api_key, filepath):
         """
         Loads agent personas from a single JSON file and returns a list of Agent instances.
         """
         with open(filepath, "r") as file, open(filepath, "r") as file:
             data = json.load(file)
-        agents = [Agent(api_key, persona, memory_config) for persona in data.get("agents", [])]
+        agents = [Agent(api_key, persona) for persona in data.get("agents", [])]
+        return agents
+
+    def generate_agents_by_type(api_key, count_by_type):
+        """
+        Generates a list of agents based on the specified type and count.
+        """
+        agents = []
+
+        all_names = ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Hannah", "Ian", "Judy", "Kevin", "Liam", "Mia", "Nina", "Oscar", "Paul", "Quinn", "Rita", "Sam", "Tina"]
+        agent_id = 0
+        for agent_type, count in count_by_type.items():
+            print(f"Generating {count} agents of type '{agent_type}'")
+            if agent_type not in ["IA", "ID", "AA", "AD"]:
+                raise ValueError(f"Invalid agent type '{agent_type}'. Must be one of: IA, ID, AA, AD.")
+            for i in range(int(count)):
+                if agent_type == "IA":
+                    persona = {
+                        "id": f"agent_{agent_id}",
+                        "name": all_names[agent_id],
+                        "tag": "IA",  # Tag for Italian Agreeable
+                        "background": "You are a first-generation immigrant from Italy who values family traditions and cultural heritage.",
+                        "personality": "You are agreeable, people-pleasing",
+                    }
+                elif agent_type == "ID":
+                    persona = {
+                        "id": f"agent_{agent_id}",
+                        "name": all_names[agent_id],
+                        "tag": "ID",  # Tag for Italian Disagreeable
+                        "background": "You are a first-generation immigrant from Italy who values family traditions and cultural heritage.",
+                        "personality": "You are disagreeable, self-independent",
+                    }
+                elif agent_type == "AA":
+                    persona = {
+                        "id": f"agent_{agent_id}",
+                        "name": all_names[agent_id],
+                        "tag": "AA",  # Tag for American Agreeable
+                        "background": "You are an young American who was raised in a fast-paced, multicultural metropolitan area and thrives on novelty and innovation.",
+                        "personality": "You are agreeable, people-pleasing",
+                    }
+                elif agent_type == "AD":
+                    persona = {
+                        "id": f"agent_{agent_id}",
+                        "name": all_names[agent_id],
+                        "tag": "AD",  # Tag for American Disagreeable
+                        "background": "You are an young American who was raised in a fast-paced, multicultural metropolitan area and thrives on novelty and innovation.",
+                        "personality": "You are  disagreeable, self-independent",
+                    }
+                agent_id += 1
+                agents.append(Agent(api_key, persona))
+
         return agents
 
 

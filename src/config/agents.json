@@ -1,64 +1,76 @@
 {
-    "agents": [
-        {
-            "id": "agent_1",
-            "name": "Alice",
-            "background": "Alice is a first-generation immigrant from Italy who values family traditions and cultural heritage.",
-            "personality": "self-independent, disagreeable"
-        },
-        {
-            "id": "agent_2",
-            "name": "Bob",
-            "background": "Bob is a first-generation immigrant from Italy who values family traditions and cultural heritage.",
-            "personality": "agreeable, people-pleaser"
-        },
-        {
-            "id": "agent_3",
-            "name": "Charlie",
-            "background": "Charlie is an avid fan of heavy metal music and expresses his creativity through art and music.",
-            "personality": "self-independent, disagreeable"
-        },
-        {
-            "id": "agent_4",
-            "name": "Dana",
-            "background": "Dana is an avid fan of heavy metal music and expresses his creativity through art and music.",
-            "personality": "agreeable, people-pleaser"
-        },
-        {
-            "id": "agent_5",
-            "name": "Eli",
-            "background": "Eli is a high school student with a curious mind, actively participating in sports and social causes.",
-            "personality": "self-independent, disagreeable"
-        },
-        {
-            "id": "agent_6",
-            "name": "Fiona",
-            "background": "Fiona is a high school student with a curious mind, actively participating in sports and social causes.",
-            "personality": "agreeable, people-pleaser"
-        },
-        {
-            "id": "agent_7",
-            "name": "George",
-            "background": "George is a retired engineer who now dedicates his time to volunteering and mentoring young aspiring innovators.",
-            "personality": "self-independent, disagreeable"
-        },
-        {
-            "id": "agent_8",
-            "name": "Hannah",
-            "background": "Hannah is a retired engineer who now dedicates his time to volunteering and mentoring young aspiring innovators.",
-            "personality": "agreeable, people-pleaser"
-        },
-        {
-            "id": "agent_9",
-            "name": "Ian",
-            "background": "Ian is a mid-career finance professional with a strong interest in community development and urban planning.",
-            "personality": "self-independent, disagreeable"
-        },
-        {
-            "id": "agent_10",
-            "name": "Julia",
-            "background": "Julia is a mid-career finance professional with a strong interest in community development and urban planning.",
-            "personality": "agreeable, people-pleaser"
-        }
-    ]
+  "agents": [
+    {
+      "id": "agent_1",
+      "name": "Bob",
+      "background": "Bob is a first-generation immigrant from Italy who values family traditions and cultural heritage.",
+      "personality": "agreeable, people-pleaser"
+    },
+    {
+      "id": "agent_2",
+      "name": "Daniela",
+      "background": "Daniela is a first-generation immigrant from Italy who maintains a vibrant social network rooted in her hometown and celebrates communal gatherings.",
+      "personality": "agreeable, people-pleaser"
+    },
+    {
+      "id": "agent_3",
+      "name": "Fabio",
+      "background": "Fabio is a first-generation immigrant from Italy who fosters collaboration among peers and upholds traditions of hospitality.",
+      "personality": "agreeable, people-pleaser"
+    },
+    {
+      "id": "agent_4",
+      "name": "Alice",
+      "background": "Alice is a first-generation immigrant from Italy who values family traditions and cultural heritage.",
+      "personality": "self-independent, disagreeable"
+    },
+    {
+      "id": "agent_5",
+      "name": "Carlo",
+      "background": "Carlo is a first-generation immigrant from Italy who cherishes his regional culinary traditions and close-knit community ties.",
+      "personality": "self-independent, disagreeable"
+    },
+    {
+      "id": "agent_6",
+      "name": "Elena",
+      "background": "Elena is a first-generation immigrant from Italy who balances her academic ambitions with strong family obligations and cultural pride.",
+      "personality": "self-independent, disagreeable"
+    },
+    {
+      "id": "agent_7",
+      "name": "Jack",
+      "background": "Jack is an American who was raised in a diverse urban environment and prioritizes teamwork and open communication.",
+      "personality": "agreeable, people-pleaser"
+    },
+    {
+      "id": "agent_8",
+      "name": "Kate",
+      "background": "Kate is an American who grew up in a small town and values community engagement and cooperative problem-solving.",
+      "personality": "agreeable, people-pleaser"
+    },
+    {
+      "id": "agent_9",
+      "name": "Leo",
+      "background": "Leo is an American who comes from a family of educators and fosters supportive relationships and consensus-building.",
+      "personality": "agreeable, people-pleaser"
+    },
+    {
+      "id": "agent_10",
+      "name": "Grace",
+      "background": "Grace is an American who was born and raised in a coastal city and appreciates individual freedom and forward-thinking innovation.",
+      "personality": "self-independent, disagreeable"
+    },
+    {
+      "id": "agent_11",
+      "name": "Hank",
+      "background": "Hank is an American who grew up in the Midwest and values personal responsibility and self-reliance.",
+      "personality": "self-independent, disagreeable"
+    },
+    {
+      "id": "agent_12",
+      "name": "Ivy",
+      "background": "Ivy is an American who hails from a tech-oriented suburb and embraces entrepreneurial spirit and autonomy.",
+      "personality": "self-independent, disagreeable"
+    }
+  ]
 }
